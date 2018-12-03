@@ -1,31 +1,20 @@
-[![Deploy to now](https://deploy.now.sh/static/button.svg)](https://deploy.now.sh/?repo=https://github.com/zenato/puppeteer-renderer)
-
 # Puppeteer(Chrome headless node API) based web page renderer
+This project is based on [zenato/puppeteer-renderer](https://github.com/zenato/puppeteer-renderer).
 
 [Puppeteer](https://github.com/GoogleChrome/puppeteer) (Chrome headless node API) based web page renderer.
 
-Useful server side rendering through proxy. Outputs HTML, PDF and screenshots as PNG.
+Useful server side rendering through proxy. Outputs HTML, PDF and screenshots as PNG or JPEG.
 
 ## Requirements
-You can run Chromium or docker.
+Docker
 
-## Getting Started
-
-### Install dependencies.
-`npm install`
-
-### Start server (If you can run Chromium)
-`npm start`
-
-(service port: 3000)
-
-### Start server using docker (If you can not run Chromium and installed docker)
-`docker run -d --name renderer -p 8080:3000 zenato/puppeteer-renderer`
+## Start server using docker.
+`docker run -d --name renderer -p 8080:3000 digitalist/alpine-puppeteer-renderer`
 
 ### Test on your browser
-Input url `http://localhost:{port}/?url=https://www.google.com`
+Input url `http://localhost:8080/?url=https://www.google.com`
 
-If you can see html code, server works fine.
+If you can see a html page (yes it will be broken - not the same for pdf and screenshots), server works fine.
 
 ## Integration with existing service.
 
@@ -51,25 +40,32 @@ app.listen(8080);
 
 ## API
 
-| Name    | Required | Value               | Description            |Usage                                                         |
-|---------|:--------:|:-------------------:|------------------------|--------------------------------------------------------------|
-|`url`    | yes      |                     |Target URL              |`http://puppeteer-renderer?url=http://www.google.com`         |
-|`type`   |          |`pdf` or `screenshot`|Rendering another type. |`http://puppeteer-renderer?url=http://www.google.com&type=pdf`|
-|(Extra options)|    |                     |Extra options (see [puppeteer API doc](https://github.com/GoogleChrome/puppeteer/blob/v1.1.0/docs/api.md#pagepdfoptions)) |`http://puppeteer-renderer?url=http://www.google.com&type=pdf&scale=2`|
+| Name        | Required | Value               | Default            |Description                                                       |
+|-------------|:--------:|:-------------------:|------------------------|--------------------------------------------------------------|
+|`url`        | yes      |       url           |                        | Target URL                                                   |
+|`variant`    |          |`pdf`, `screenshot`  |                        | Rendering another type.                                      |
+|`type`        |          |    `jpeg`, `png`    |  `png`                | Image output type                                            |
+|`isMobile`   |          |`true`, `false`      | `false`                | Emulate mobile                                               |
+|`width`        |          | number   |      `800`                      | Width of screenshot                                          |
+|`height`        |          | number  |      `600`                      | Height of screenshot                                         |
+|`media`   |          |`print`, `screen`      | `print`                 | CSS media type                                               |
+|`deviceScaleFactor`   |          |number     | `1`                     | Device scale                                                 |
+|`jsEnabled`   |          |`true`, `false`     | `true`                 | Enable javascript                                            |
+|`hasTouch`   |          |`true`, `false`     | `false`                 | Emulate touch                                                |
+|`isLandscape`   |          |`true`, `false`     | `false`              | Emualte landscape                                            |
+|`waitUntil`   |          |`load`, `domcontentloaded`, `networkidle0`, `networkidle2`    | `networkidle0`    | When considered done loading page|
+|`timeout`        |          | number  |      `30000`                   | Request timeout time                                         |
+|`quality`        |          | number  |      `100`                     | Quality of output image, only valid for jpeg, errors on png |
 
-## PDF File Name Convention
+### Examples
 
-Generated PDFs are returned with a `Content-disposition` header requesting the browser to download the file instead of showing it.
-The file name is generated from the URL rendered:
+```
+http://localhost:8080/?url=https://www.google.com&type=png&width=1200&height=800&variant=screenshot
+```
+Outputs a screenshot of google in png format, width 1200 and height 800.
 
-| URL                                           | Filename                     |   
-|-----------------------------------------------|------------------------------|   
-| `https://www.example.com/`                    | `www.example.com.pdf`        |
-| `https://www.example.com:80/`                 | `www.example.com.pdf`        |
-| `https://www.example.com/resource`            | `resource.pdf`               |
-| `https://www.example.com/resource.extension`  | `resource.pdf`               |
-| `https://www.example.com/path/`               | `path.pdf`                   |
-| `https://www.example.com/path/to/`            | `pathto.pdf`                 |
-| `https://www.example.com/path/to/resource`    | `resource.pdf`               |
-| `https://www.example.com/path/to/resource.ext`| `resource.pdf`               |
 
+```
+http://localhost:8080/?url=https://www.google.com&type=jpeg&width=1200&height=800&variant=screenshot&quality=80
+```
+Outputs a screenshot of google in jpeg format, in 80% quality, width 1200 and height 800

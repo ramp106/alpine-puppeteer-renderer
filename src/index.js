@@ -16,10 +16,10 @@ app.disable('x-powered-by')
 
 // Render url.
 app.use(async (req, res, next) => {
-  let { url, type, ...options } = req.query
+  let { url, type, variant, ...options } = req.query
 
   if (!url) {
-    return res.status(400).send('Search with url parameter. For eaxample, ?url=http://yourdomain')
+    return res.status(400).send('You must provide an URL argument, like ?url=http://yourdomain')
   }
 
   if (!url.includes('://')) {
@@ -28,6 +28,21 @@ app.use(async (req, res, next) => {
 
   try {
     switch (type) {
+      case 'png':
+        var typeImage = 'image/png'
+        break
+      case 'jpeg':
+        var typeImage = 'image/jpeg'
+        break
+      default:
+        var typeImage = 'image/png'
+    }
+  } catch (e) {
+    next(e)
+  }
+
+  try {
+    switch (variant) {
       case 'pdf':
         const urlObj = new URL(url)
         let filename = urlObj.hostname
@@ -48,10 +63,10 @@ app.use(async (req, res, next) => {
         break
 
       case 'screenshot':
-        const image = await renderer.screenshot(url, options)
+        const image = await renderer.screenshot(url, type, options)
         res
           .set({
-            'Content-Type': 'image/png',
+            'Content-Type': typeImage,
             'Content-Length': image.length,
           })
           .send(image)
@@ -69,7 +84,7 @@ app.use(async (req, res, next) => {
 // Error page.
 app.use((err, req, res, next) => {
   console.error(err)
-  res.status(500).send('Oops, An expected error seems to have occurred.')
+  res.status(500).send('Ooops! An unexpected error seems to have occurred.')
 })
 
 // Create renderer and start server.

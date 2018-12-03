@@ -1,6 +1,6 @@
 'use strict'
 
-const puppeteer = require('puppeteer')
+const puppeteer = require('puppeteer-core')
 
 class Renderer {
   constructor(browser) {
@@ -8,11 +8,12 @@ class Renderer {
   }
 
   async createPage(url, options = {}) {
-    const { timeout, waitUntil } = options
+    const { timeout, waitUntil, ...extraOptions } = options
     const page = await this.browser.newPage()
+
     await page.goto(url, {
-      timeout: Number(timeout) || 30 * 1000,
-      waitUntil: waitUntil || 'networkidle2',
+      timeout: Number(extraOptions.timeout || 30 * 1000),
+      waitUntil: String(extraOptions.waitUntil || 'networkidle0'),
     })
     return page
   }
@@ -53,21 +54,45 @@ class Renderer {
     }
   }
 
-  async screenshot(url, options = {}) {
+  async screenshot(url, type, options = {}) {
     let page = null
     try {
       const { timeout, waitUntil, ...extraOptions } = options
       page = await this.createPage(url, { timeout, waitUntil })
-      page.setViewport({
-        width: Number(extraOptions.width || 800),
-        height: Number(extraOptions.height || 600),
+
+      const {
+        width,
+        height,
+        isMobile,
+        deviceScaleFactor,
+        hasTouch,
+        isLandscape,
+        media,
+        JSenabled,
+      } = extraOptions
+      await page.setViewport({
+        width: Number(width || 800),
+        height: Number(height || 600),
+        isMobile: Boolean(isMobile || false),
+        deviceScaleFactor: Number(deviceScaleFactor || 1),
+        hasTouch: Boolean(hasTouch || false),
+        isLandscape: Boolean(isLandscape || false),
       })
 
-      const { fullPage, omitBackground, imageType, quality } = extraOptions
+      var mediaType = String(media || 'screen')
+      var jsEnabled = Boolean(JSenabled || true)
+      await page.emulateMedia(mediaType)
+      await page.setJavaScriptEnabled(jsEnabled)
+
+      //await page.addScriptTag({content: 'alert("foo")'})
+      //await page.addStyleTag({content: 'body {background-color:red}'})
+
+      const { fullPage, omitBackground, quality } = extraOptions
+
       const buffer = await page.screenshot({
         ...extraOptions,
-        type: imageType || 'png',
-        quality: Number(quality) || (imageType === undefined || imageType == 'png' ? 0 : 100),
+        type: type,
+        quality: Number(quality) || (type === undefined || type == 'png' ? 0 : 100),
         fullPage: fullPage === 'true',
         omitBackground: omitBackground === 'true',
       })
@@ -85,7 +110,11 @@ class Renderer {
 }
 
 async function create() {
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: process.env.CHROME_BIN || null,
+    args: ['--no-sandbox', '--headless', '--disable-gpu', '--disable-dev-shm-usage'],
+  })
   return new Renderer(browser)
 }
 
