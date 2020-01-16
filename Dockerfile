@@ -10,7 +10,7 @@ RUN set -x \
     udev \
     ttf-freefont \
     chromium \
-    && npm install puppeteer-core@1.10.0 --silent \
+    && npm install puppeteer-core@2.0.0 --silent \
       \
       # Do some cleanup
       && apk del --no-cache make gcc g++ python binutils-gold gnupg libstdc++ \
