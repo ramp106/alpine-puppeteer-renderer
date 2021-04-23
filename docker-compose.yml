@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  screenshot:
+    build: 
+      context: .
+    environment:
+      PORT: 3001
+    ports:
+      - 3001:3001
+    expose:
+      - 3001

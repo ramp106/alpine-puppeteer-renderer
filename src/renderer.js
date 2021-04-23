@@ -1,7 +1,7 @@
 'use strict'
 
 const puppeteer = require('puppeteer-core')
-
+const index = require('./index')
 class Renderer {
   constructor(browser) {
     this.browser = browser
@@ -115,6 +115,13 @@ async function create() {
     executablePath: process.env.CHROME_BIN || null,
     args: ['--no-sandbox', '--headless', '--disable-gpu', '--disable-dev-shm-usage'],
   })
+
+  browser.on('disconnected', ()=>{
+    index(create())
+  });
+  console.log(`Started Puppeteer with pid ${browser.process().pid}`);
+
+  
   return new Renderer(browser)
 }
 

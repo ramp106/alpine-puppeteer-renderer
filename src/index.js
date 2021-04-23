@@ -87,6 +87,10 @@ app.use((err, req, res, next) => {
   res.status(500).send('Ooops! An unexpected error seems to have occurred.')
 })
 
+const updateBrowser = (createdRenderer)=> {
+    renderer = createdRenderer
+}
+
 // Create renderer and start server.
 createRenderer()
   .then(createdRenderer => {
@@ -105,3 +109,5 @@ createRenderer()
 process.on('SIGINT', () => {
   process.exit(0)
 })
+
+module.exports = updateBrowser
