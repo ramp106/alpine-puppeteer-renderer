@@ -200,17 +200,12 @@ async function create () {
     executablePath: process.env.CHROME_BIN || null,
     args: ['--no-sandbox', '--headless', '--disable-gpu', '--disable-dev-shm-usage'],
   })
-console.log('this is index')
   browser.on('disconnected', async () => {
-    console.log('browser crashed')
+    console.log('Browser crashed, restarting')
     let renderer = await create()
     updateBrowser(renderer)
   });
-  setTimeout(async () =>{
-    console.log('initial browser crashed')
-    let renderer = await create()
-    updateBrowser(renderer)
-  }, 30000)
+
   console.log(`Started Puppeteer with pid ${browser.process().pid}`);
 
   
