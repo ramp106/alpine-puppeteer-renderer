@@ -91,9 +91,7 @@ class Renderer {
       var jsEnabled = Boolean(JSenabled || true)
       await page.emulateMedia(mediaType)
       await page.setJavaScriptEnabled(jsEnabled)
-
-      //await page.addScriptTag({content: 'alert("foo")'})
-      //await page.addStyleTag({content: 'body {background-color:red}'})
+      await page.setDefaultNavigationTimeout(0)
 
       const { fullPage, omitBackground, quality } = extraOptions
 
