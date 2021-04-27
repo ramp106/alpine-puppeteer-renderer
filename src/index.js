@@ -121,9 +121,14 @@ app.disable('x-powered-by')
 app.use(async (req, res, next) => {
   let { url, type, variant, ...options } = req.query
 
+  if (req.path == '/healthz'){
+    return res.status(200).send('ok')
+  }
+
   if (!url) {
     return res.status(400).send('You must provide an URL argument, like ?url=http://yourdomain')
   }
+  
 
   if (!url.includes('://')) {
     url = `http://${url}`
